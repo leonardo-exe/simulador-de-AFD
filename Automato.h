@@ -83,6 +83,8 @@ public:
 	void defineEstado(const Estado& novo, int estado);
 	//imprime todas as informações do automato (alfabeto, estados, estados finais e transições)
 	void imprime() const;
+	//imprime uma linguagem regular capaz de gerar a linguagem
+	void linguagemRegular() const;
 };
 //função que dado um objeto Estado, verifica se existe uma transição de saída que consome o caractere passado
 //pré-condição: o estado possui uma lista de transições

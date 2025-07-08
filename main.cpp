@@ -17,7 +17,7 @@ int main()
 			Automato* automato = carregaArq(nome);
 			try
 			{
-				automato->imprime();
+				automato->linguagemRegular();
 				cout << "Digite uma palavra para ser testada pelo automato ou digite -1 para encerrar o programa (obs: string vazia representada com @)" << endl;
 				while (1)
 				{
@@ -69,7 +69,7 @@ int main()
 					novo.final();
 				automato.defineEstado(novo, j);
 			}
-			automato.imprime();
+			automato.linguagemRegular();
 			cout << "Digite uma palavra para ser testada pelo automato ou digite -1 para encerrar o programa (obs: string vazia representada com @)" << endl;
 			while (1)
 			{

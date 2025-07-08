@@ -151,11 +151,24 @@ void Automato::imprime() const
 			atual.imprimeSaidas();
 		});
 }
+//"corta" a string antes do indice passado
+static std::string corta(std::string str, int inicio)
+{
+	std::string result = "";
+	for (int i = 0; i < str.length(); i++)
+	{
+		if (i >= inicio)
+			result += str[i];
+	}
+	return result;
+}
 bool Automato::operator>>(std::string palavra) const
 {
 	Estado atual = this->estados[0];
-	if (palavra == "@")
+	if (palavra == "@") {
+		std::cout << "[" << atual.getElemento() << "]" << std::endl;
 		return atual.getFinal() ? true : false;
+	}
 	for (int i = 0; i < palavra.length(); i++)
 	{
 		if (saidaExiste(atual, palavra[i]))
@@ -163,9 +176,9 @@ bool Automato::operator>>(std::string palavra) const
 			Saida* saida = atual.getSaida();
 			while (saida != nullptr)
 			{
-				if (saida->saida == palavra[i]) 
+				if (saida->saida == palavra[i])
 				{
-					std::cout << atual.getElemento() << " " << palavra[i] << "-> " << this->estados[saida->destino].getElemento() << std::endl;
+					std::cout << "[" << atual.getElemento() << "]" << corta(palavra, i) << std::endl;
 					atual = this->estados[saida->destino];
 					break;
 				}
@@ -174,12 +187,11 @@ bool Automato::operator>>(std::string palavra) const
 		}
 		else
 		{
-			std::cout << atual.getElemento() << " " << palavra[i] << "->" << " X" << std::endl;
+			std::cout << "[" << atual.getElemento() << "]" << std::endl;
 			return false;
 		}
 	}
-	if (!atual.getFinal())
-		std::cout << atual.getElemento() << " nao eh estado final" << std::endl;
+	std::cout << "[" << atual.getElemento() << "]" << std::endl;
 	return atual.getFinal() ? true : false;
 }
 void Automato::validaAlfabeto(std::string alfabeto) const
@@ -188,4 +200,27 @@ void Automato::validaAlfabeto(std::string alfabeto) const
 		if (!(c >= 'a' && c <= 'z') && !(c >= '0' && c <= '9'))
 			throw std::runtime_error("o alfabeto deve possuir apenas letras minusculas e digitos");
 		});
+}
+void Automato::linguagemRegular() const
+{
+	std::cout << "Linguagem gerada pelo automato:" << std::endl;
+	char naoTerminais = 'A' - 1;
+	char atualC = 'S';
+	for (int i = 0; i < estados.size(); i++)
+	{	
+		Saida* atual = estados[i].getSaida();
+		char c1 = naoTerminais + atual->destino;
+		std::cout << atualC << " -> " << atual->saida << (c1 == '@' ? 'S' : c1);
+		atual = atual->prox;
+		while (atual != NULL)
+		{
+			char c2 = naoTerminais + atual->destino;
+			std::cout << " | " << atual->saida << (c2 == '@' ? 'S' : c2);
+			atual = atual->prox;
+		}
+		if (estados[i].getFinal())
+			std::cout << " | @";
+		std::cout << std::endl;
+		atualC = naoTerminais + i+1;
+	}
 }
