@@ -7,108 +7,108 @@
 #include <algorithm>
 #include <fstream>
 #include <ctype.h>
-//essa struct representa uma lista encadeada que guarda todas as transições de saída
+//essa struct representa uma lista encadeada que guarda todas as transiÃ§Ãµes de saÃ­da
 //de um determinado estado
 typedef struct no
 {
-	//caractere lido na transição de estados
+	//caractere lido na transiÃ§Ã£o de estados
 	char saida;
-	//inteiro que representa o estado para onde a transição leva
+	//inteiro que representa o estado para onde a transiÃ§Ã£o leva
 	int destino;
-	//ponteiro para o próximo elemento da lista 
+	//ponteiro para o prÃ³ximo elemento da lista 
 	struct no* prox;
 } Saida;
-//abstração de um estado Q_n 
+//abstraÃ§Ã£o de um estado Q_n 
 class Estado
 {
 private:
-	//lista de transições de saída do estado
+	//lista de transiÃ§Ãµes de saÃ­da do estado
 	Saida* saidas;
-	//true caso o estado seja final e false caso contrário
+	//true caso o estado seja final e false caso contrÃ¡rio
 	bool ehfinal;
 	//numero que representa o estado Q_n, ex: Q_5
 	int elemento;
 public:
-	//construtor que inicializa as variáveis
+	//construtor que inicializa as variÃ¡veis
 	Estado(int elemento);
-	//construtor que faz uma copia de um estado já existente 
+	//construtor que faz uma copia de um estado jÃ¡ existente 
 	Estado(const Estado& other);
-	//sobrecarga do operador de atribuição, faz com que seja atribuido uma cópia profunda
-	//do estado, criando uma nova lista encadeada igual a original, porém, em outro endereço
+	//sobrecarga do operador de atribuiÃ§Ã£o, faz com que seja atribuido uma cÃ³pia profunda
+	//do estado, criando uma nova lista encadeada igual a original, porÃ©m, em outro endereÃ§o
 	void operator=(const Estado& other);
-	//destrutor que desaloca a lista encadeada de transições
+	//destrutor que desaloca a lista encadeada de transiÃ§Ãµes
 	~Estado();
-	//adiciona uma transição na lista encadeada
+	//adiciona uma transiÃ§Ã£o na lista encadeada
 	void pushSaida(char saida, int destino);
 	//define o estado como final
 	void final();
-	//recebe um caractere e um estado de destino, busca se existe uma transição para esse 
-	//outro estado através do caractere requerido
+	//recebe um caractere e um estado de destino, busca se existe uma transiÃ§Ã£o para esse 
+	//outro estado atravÃ©s do caractere requerido
 	bool transicaoValida(const Estado& other, char caracter) const;
-	//retorna se o estado é final ou não
+	//retorna se o estado Ã© final ou nÃ£o
 	bool getFinal() const { return this->ehfinal; }
-	//retorna uma string que representa o elemento no formato "qn", sendo n um número inteiro
+	//retorna uma string que representa o elemento no formato "qn", sendo n um nÃºmero inteiro
 	std::string getElemento() const { return "q" + std::to_string(this->elemento); }
 	//retorna o inteiro n que representa o elemento
 	int getElementointeiro() const { return this->elemento; }
-	//imprime todas as transições do estado 
+	//imprime todas as transiÃ§Ãµes do estado 
 	void imprimeSaidas() const;
-	//retorna o ponteiro da cabeça da lista de transições
+	//retorna o ponteiro da cabeÃ§a da lista de transiÃ§Ãµes
 	Saida* getSaida() const { return saidas; }
 };
-//abstração de um automato finito determinístico (AFD)
+//abstraÃ§Ã£o de um automato finito determinÃ­stico (AFD)
 class Automato
 {
 private:
 	//quantidade de estados que o automato possui
 	int nEstados;
-	//string que representa o alfabeto, todos os char são caracteres de transição mo automato
+	//string que representa o alfabeto, todos os char sÃ£o caracteres de transiÃ§Ã£o mo automato
 	std::string alfabeto;
-	//vetor de objetos Estado que contém todos os estados Q_n do automato
+	//vetor de objetos Estado que contÃ©m todos os estados Q_n do automato
 	std::vector<Estado> estados;
-	//vetor de objetos Estado que contém apenas os estados finais do automato
+	//vetor de objetos Estado que contÃ©m apenas os estados finais do automato
 	std::vector<Estado> finais;
-	//método interno que valida se o alfabeto lido se encontra dentro dos limites estabelecidos [a-z] [0-9] 
+	//mÃ©todo interno que valida se o alfabeto lido se encontra dentro dos limites estabelecidos [a-z] [0-9] 
 	//chamado no construtor do automato
 	void validaAlfabeto(std::string alfabeto) const;
 public:
-	//construtor que inicializa as variáveis e o vetor de estados
+	//construtor que inicializa as variÃ¡veis e o vetor de estados
 	Automato(std::string alfabeto, int nEstados);
-	//destrutor que desaloca os vetores dinâmicos
+	//destrutor que desaloca os vetores dinÃ¢micos
 	~Automato();
 	//sobrecarga de operador que dado um automato e uma string, percorre os caracteres da string pelo automato
-	//retorna um valor booleano que diz se a palavra é aceita ou não pelo automato
+	//retorna um valor booleano que diz se a palavra Ã© aceita ou nÃ£o pelo automato
 	bool operator>>(std::string palavra) const;
-	//insere um novo estado na posição designada
+	//insere um novo estado na posiÃ§Ã£o designada
 	void defineEstado(const Estado& novo, int estado);
-	//imprime todas as informações do automato (alfabeto, estados, estados finais e transições)
+	//imprime todas as informaÃ§Ãµes do automato (alfabeto, estados, estados finais e transiÃ§Ãµes)
 	void imprime() const;
-	//imprime uma linguagem regular capaz de gerar a linguagem
+	//imprime uma linguagem regular gerada pelo automato
 	void linguagemRegular() const;
 };
-//função que dado um objeto Estado, verifica se existe uma transição de saída que consome o caractere passado
-//pré-condição: o estado possui uma lista de transições
-//pós-condição: nenhuma
+//funÃ§Ã£o que dado um objeto Estado, verifica se existe uma transiÃ§Ã£o de saÃ­da que consome o caractere passado
+//prÃ©-condiÃ§Ã£o: o estado possui uma lista de transiÃ§Ãµes
+//pÃ³s-condiÃ§Ã£o: nenhuma
 //entrada: objeto Estado e um char
-//retorno: valor booleano que depende se a condição é cumprida ou não
+//retorno: valor booleano que depende se a condiÃ§Ã£o Ã© cumprida ou nÃ£o
 bool saidaExiste(const Estado& q, char c);
-//função que dado um objeto Estado, verifica se existe no alfabeto da linguagem todos os caracteres de transição
+//funÃ§Ã£o que dado um objeto Estado, verifica se existe no alfabeto da linguagem todos os caracteres de transiÃ§Ã£o
 //presentes no estado
-//pré-condição: o estado possui uma lista de transições
-//pós-condição: nenhuma
+//prÃ©-condiÃ§Ã£o: o estado possui uma lista de transiÃ§Ãµes
+//pÃ³s-condiÃ§Ã£o: nenhuma
 //entrada: objeto Estado e uma string com as letras do alfabeto
-//retorno: valor booleano que depende se a condição é cumprida ou não
+//retorno: valor booleano que depende se a condiÃ§Ã£o Ã© cumprida ou nÃ£o
 bool existeNoAlfabeto(const Estado& q, std::string alfabeto);
-//função que abre um arquivo texto, lê os dados e carrega para um objeto Automato
-//pré-condição: deve existir um arquivo texto com o exato mesmo nome do passado para a função
-//pós-condição: um automato completo é alocado na memória
+//funÃ§Ã£o que abre um arquivo texto, lÃª os dados e carrega para um objeto Automato
+//prÃ©-condiÃ§Ã£o: deve existir um arquivo texto com o exato mesmo nome do passado para a funÃ§Ã£o
+//pÃ³s-condiÃ§Ã£o: um automato completo Ã© alocado na memÃ³ria
 //entrada: string contendo o nome do arquivo texto
-//retorno: endereço da área de memória onde foi alocado o objeto Automato
+//retorno: endereÃ§o da Ã¡rea de memÃ³ria onde foi alocado o objeto Automato
 Automato* carregaArq(std::string nome);
-//função que le e valida o buffer, evita comportamento inesperado em tempo de execução
-//pré-condição: nenhuma
-//pós-condição: buffer vazio
-//entrada: limitação de caracteres que pode ser lido
-//retorno: primeiro inteiro válido lido
+//funÃ§Ã£o que le e valida o buffer, evita comportamento inesperado em tempo de execuÃ§Ã£o
+//prÃ©-condiÃ§Ã£o: nenhuma
+//pÃ³s-condiÃ§Ã£o: buffer vazio
+//entrada: limitaÃ§Ã£o de caracteres que pode ser lido
+//retorno: primeiro inteiro vÃ¡lido lido
 int leBuffer(int floor, int ceil);
 #endif
