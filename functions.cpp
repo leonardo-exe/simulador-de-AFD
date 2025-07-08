@@ -71,31 +71,41 @@ static void final(std::string linha, std::vector<int>& finais)
 			j++;
 		}
 }
+//"corta" a string antes do indice passado
+static std::string corta(std::string str, int inicio)
+{
+	std::string result = "";
+	for (int i = 0; i < str.length(); i++)
+	{
+		if (i >= inicio)
+			result += str[i];
+	}
+	return result;
+}
+// Retorna o índice da primeira ocorrência de 'c' em 'str', ou -1 se não encontrado
+static int indicePrimeiraOcorrencia(const std::string& str, char c)
+{
+	for (int i = 0; i < str.length(); i++)
+	{
+		if (str[i] == c)
+			return i;
+	}
+	return -1;
+}
 Automato* carregaArq(std::string nome)
 {
 	std::ifstream arquivo(nome.c_str());
 	if (!arquivo.is_open())
 		throw std::runtime_error("Nao foi possivel abrir o arquivo");
-	std::string linhas[6];
+	std::string linhas[3];
 	std::string letras;
 	int nEstados;
 	std::vector<int> finais;
-	for (int i = 0; i < 6; i++)
-	{
-		if (i % 2)
-			std::getline(arquivo, linhas[i]);
-		else
-			std::getline(arquivo, linhas[i], '=');
-	}
-	for (int i = 0; i < 6; i++)
-	{
-		if (linhas[i] == "alfabeto")
-			letras = alfabeto(linhas[i + 1]);
-		if (linhas[i] == "estados")
-			nEstados = quantiaEstados(linhas[i + 1]);
-		if (linhas[i] == "finais")
-			final(linhas[i + 1], finais);
-	}
+	for (int i = 0; i < 3; i++)
+		std::getline(arquivo, linhas[i]);
+	letras = alfabeto(corta(linhas[0], indicePrimeiraOcorrencia(linhas[0], '{')));
+	nEstados = quantiaEstados(corta(linhas[1], indicePrimeiraOcorrencia(linhas[1], '{')));
+	final((corta(linhas[2], indicePrimeiraOcorrencia(linhas[2], '{'))), finais);
 	Automato* automato = new Automato(letras, nEstados);
 	std::string linha;
 	std::vector<Estado> aux;
