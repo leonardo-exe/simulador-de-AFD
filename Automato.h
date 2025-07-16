@@ -17,7 +17,7 @@ class Estado
 private:
 	/// @brief objeto vetor da classe std::vector que contem as transicoes de saida do estado 
 	std::vector<Saida> saidas;
-	/// @brief true caso o estado seja final e false caso contrário 
+	/// @brief true caso o estado seja final e false caso contrï¿½rio 
 	bool ehfinal;
 	/// @brief numero que representa o estado Q_n, ex: Q_5
 	int elemento;
@@ -140,5 +140,3 @@ Automato* carregaArq(std::string nome);
 int leBuffer(int floor, int ceil);
 /// @author Leonardo Picagevicz
 #endif
-
-
