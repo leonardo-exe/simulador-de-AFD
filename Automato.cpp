@@ -1,84 +1,51 @@
 #include "Automato.h"
+#include <iostream>
+#include <algorithm>
 
+/// inicializando variaveis
 Estado::Estado(int elemento)
 {
 	this->ehfinal = false;
-	this->saidas = nullptr;
 	this->elemento = elemento;
 }
-Estado::~Estado()
-{
-	Saida* atual = this->saidas;
-	Saida* proximoNo = nullptr;
-	while (atual != nullptr)
-	{
-		proximoNo = atual->prox;
-		delete atual;
-		atual = proximoNo;
-	}
-	this->saidas = nullptr;
-}
+/// metodo da classe std::vector se responsabiliza de adicionar ao vetor
 void Estado::pushSaida(char saida, int destino)
 {
-	Saida* novo = new Saida;
-	novo->destino = destino;
-	novo->saida = saida;
-	novo->prox = nullptr;
-
-	if (this->saidas == nullptr)
-	{
-		this->saidas = novo;
-		return;
-	}
-
-	Saida* atual = this->saidas;
-	while (atual->prox != nullptr) atual = atual->prox;
-	atual->prox = novo;
+	this->saidas.push_back({ saida, destino });
 }
+/// apenas define como verdadeira a variavel ehfinal
 void Estado::final()
 {
 	this->ehfinal = true;
 }
+/// percorre todo o vetor de saidas buscando uma saida que tenha como destino o parametro other, lendo o parametro caracter
 bool Estado::transicaoValida(const Estado& other, char caracter) const
 {
-	Saida* aux = this->saidas;
-	while (aux != nullptr)
-		if (aux->destino == other.elemento && aux->saida == caracter)
+	for (int i = 0; i < this->saidas.size(); i++)
+		if (this->saidas[i].destino == other.elemento && this->saidas[i].saida == caracter)
 			return true;
-		else
-			aux = aux->prox;
 	return false;
 }
+/// percorre o vetor de saidas do estado, enquanto imprime seus dados no formato "(q<estado>, <caractere>) = q<destino>"
 void Estado::imprimeSaidas() const
 {
-	Saida* atual = this->saidas;
-	while (atual != nullptr)
+	for (int i = 0; i < this->saidas.size(); i++)
 	{
-		std::cout << "(" << this->getElemento() << ", " << atual->saida << " = " << "q" << std::to_string(atual->destino) << ")" << std::endl;
-		atual = atual->prox;
+		std::cout << "(" << this->getElemento() << ", " << saidas[i].saida << " = " << "q" << std::to_string(saidas[i].destino) << ")" << std::endl;
 	}
 }
-Estado::Estado(const Estado& other) : ehfinal(other.ehfinal), elemento(other.elemento), saidas(nullptr)
-{
-	Saida* atual = other.saidas;
-	while (atual != nullptr) {
-		this->pushSaida(atual->saida, atual->destino);
-		atual = atual->prox;
-	}
-}
+/// ja inicializa com as variaveis do paramentro other
+Estado::Estado(const Estado& other) : ehfinal(other.ehfinal), elemento(other.elemento), saidas(other.saidas)
+{}
+/// apenas atribui para this as variaveis do parametro other
 void Estado::operator=(const Estado& other)
 {
 	this->ehfinal = other.ehfinal;
 	this->elemento = other.elemento;
-	this->saidas = nullptr;
+	this->saidas = other.saidas;
 
-	Saida* atual = other.saidas;
-	while (atual != nullptr)
-	{
-		this->pushSaida(atual->saida, atual->destino);
-		atual = atual->prox;
-	}
 }
+/// constroi o objeto desde que a string alfabeto seja valida, cria a quantidade nEstados de elementos no vetor 
 Automato::Automato(std::string alfabeto, int nEstados)
 {
 	validaAlfabeto(alfabeto);
@@ -90,22 +57,22 @@ Automato::Automato(std::string alfabeto, int nEstados)
 		estados.push_back(aux);
 	}
 }
+/// nao realiza nada, apenas para fins de controle
 Automato::~Automato()
 {
 	std::cout << "Memoria liberada" << std::endl;
 }
-//função auxiliar para verificar se as transições de u estado tem destinos válidos
+//função auxiliar para verificar se as transições de um estado tem destinos válidos
 static bool existeDestino(const Estado& estado, int max)
 {
-	Saida* atual = estado.getSaida();
-	while (atual != NULL)
+	for (int i = 0; i < estado.getSaida().size(); i++)
 	{
-		if (atual->destino >= max)
+		if (estado.getSaida()[i].destino >= max)
 			return false;
-		atual = atual->prox;
 	}
 	return true;
 }
+/// desde que as condicoes estejam corretas, adiciona no vetor o estado novo, utiliza o metodo push_back de std::vector
 void Automato::defineEstado(const Estado& novo, int estado)
 {
 	if (!existeNoAlfabeto(novo, this->alfabeto))
@@ -116,6 +83,13 @@ void Automato::defineEstado(const Estado& novo, int estado)
 	if (this->estados[estado].getFinal())
 		this->finais.push_back(novo);
 }
+/**
+ * imprime as informacoes do automato no formato:
+ * alfabeto={q<estado>,...}
+ * estados={q<estado>,...}
+ * finais={q<estado>,...}
+ * (q<estado>, <caractere>) = q<estado_destino>
+ */
 void Automato::imprime() const
 {
 	std::cout << "Alfabeto = {";
@@ -128,7 +102,7 @@ void Automato::imprime() const
 	}
 	std::cout << "}" << std::endl;
 	std::cout << "Estados = {";
-	int size = estados.size();
+	size_t size = estados.size();
 	for (int i = 0; i < size; i++)
 	{
 		if (i == size - 1)
@@ -162,6 +136,13 @@ static std::string corta(std::string str, int inicio)
 	}
 	return result;
 }
+/**
+ * percorre a string palavra, ao mesmo tempo que percorre o vetor de estados e o vetor de saidas dentro de cada estado,
+ * ao encontrar uma transicao valida do estado atual utilizando o caractere da iteracao atual da string, o estado atual passa
+ * a ser o destino da transicao e a string entra na proxima iteracao, na primeira vez que isso nao acontecer a funcao retorna false
+ * mesmo que leia a palavra inteira, se o estado em que atual se encontrar no final nao estiver marcado como final, a funcao retorna 
+ * false 
+ */
 bool Automato::operator>>(std::string palavra) const
 {
 	Estado atual = this->estados[0];
@@ -173,16 +154,14 @@ bool Automato::operator>>(std::string palavra) const
 	{
 		if (saidaExiste(atual, palavra[i]))
 		{
-			Saida* saida = atual.getSaida();
-			while (saida != nullptr)
+			for (int j = 0; j < atual.getSaida().size(); j++)
 			{
-				if (saida->saida == palavra[i])
+				if (atual.getSaida()[j].saida == palavra[i])
 				{
 					std::cout << "[" << atual.getElemento() << "]" << corta(palavra, i) << std::endl;
-					atual = this->estados[saida->destino];
+					atual = this->estados[atual.getSaida()[j].destino];
 					break;
 				}
-				saida = saida->prox;
 			}
 		}
 		else
@@ -194,6 +173,7 @@ bool Automato::operator>>(std::string palavra) const
 	std::cout << "[" << atual.getElemento() << "]" << std::endl;
 	return atual.getFinal() ? true : false;
 }
+/// itera sobre a string alfabeto, verificando se os caracteres se encontram dentro dos limites [a-z] e [0-9]
 void Automato::validaAlfabeto(std::string alfabeto) const
 {
 	std::for_each(alfabeto.begin(), alfabeto.end(), [](char c) {
@@ -201,6 +181,16 @@ void Automato::validaAlfabeto(std::string alfabeto) const
 			throw std::runtime_error("o alfabeto deve possuir apenas letras minusculas e digitos");
 		});
 }
+/**
+ * o formato da linguagem sempre vai ter que:
+ * q0 = 'S'
+ * qN = '@' + n
+ * ou seja, seguindo a tabela ASCII, cada estado vai ser representado por uma letra maiúscula,
+ * a letra minuscula representa o  caractere lido e a maiuscula o destino da transicao, '@' representa
+ * a string vazia, ou o final da palavra, ex:
+ * S -> aA | @
+ * basicamente, a funcao itera pelo vetor de estados e imprime suas transicoes no formato de gramatica regular  
+ */
 void Automato::linguagemRegular() const
 {
 	std::cout << "Linguagem gerada pelo automato:" << std::endl;
@@ -208,15 +198,12 @@ void Automato::linguagemRegular() const
 	char atualC = 'S';
 	for (int i = 0; i < estados.size(); i++)
 	{	
-		Saida* atual = estados[i].getSaida();
-		char c1 = naoTerminais + atual->destino;
-		std::cout << atualC << " -> " << atual->saida << (c1 == '@' ? 'S' : c1);
-		atual = atual->prox;
-		while (atual != NULL)
+		char c1 = naoTerminais + estados[i].getSaida()[0].destino;
+		std::cout << atualC << " -> " << estados[i].getSaida()[0].saida << (c1 == '@' ? 'S' : c1);
+		for (int j = 1; j < estados[i].getSaida().size(); j++)
 		{
-			char c2 = naoTerminais + atual->destino;
-			std::cout << " | " << atual->saida << (c2 == '@' ? 'S' : c2);
-			atual = atual->prox;
+			char c2 = naoTerminais + estados[i].getSaida()[j].destino;
+			std::cout << " | " << estados[i].getSaida()[j].saida << (c2 == '@' ? 'S' : c2);
 		}
 		if (estados[i].getFinal())
 			std::cout << " | @";
