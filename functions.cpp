@@ -1,25 +1,32 @@
 #include "Automato.h"
+#include <iostream>
+#include <fstream>	
+#include <algorithm>
 
+/**
+ * A funcao percorre o vetor de saidas do parametro q, 
+ * retornando true quando uma saida possuir caractere igual ao parametro c 
+ */
 bool saidaExiste(const Estado& q, char c)
 {
 	bool result = false;
-	Saida* saidas = q.getSaida();
-	while (saidas != nullptr)
+	for (int i = 0; i < q.getSaida().size(); i++)
 	{
-		if (saidas->saida == c)
+		if (q.getSaida()[i].saida == c)
 			result = true;
-		saidas = saidas->prox;
 	}
 	return result;
 }
+/**
+ * Percorre o vetor de saidas do parametro q e coleta todos os caracteres de transicao,
+ * depois verifica se todos esses caracteres existem no alfabeto
+ */
 bool existeNoAlfabeto(const Estado& q, std::string alfabeto)
 {
-	Saida* saidas = q.getSaida();
 	std::string letras = "";
-	while (saidas != nullptr)
+	for (int i = 0; i < q.getSaida().size(); i++)
 	{
-		letras += saidas->saida;
-		saidas = saidas->prox;
+		letras += q.getSaida()[i].saida;
 	}
 	for (int i = 0; i < letras.length(); i++)
 	{
@@ -36,8 +43,9 @@ bool existeNoAlfabeto(const Estado& q, std::string alfabeto)
 	}
 	return true;
 }
-//percorre a linha do arquivo e retorna uma string com os caracteres validos
-static std::string alfabeto(std::string linha)
+// percorre a linha do arquivo e retorna uma string com os caracteres validos, 
+// ou seja, os dentro de chaves e separados por virgulas
+ static std::string alfabeto(std::string linha)
 {
 	std::string alfab = "";
 	for (int i = 0; i < linha.length(); i++)
@@ -47,7 +55,7 @@ static std::string alfabeto(std::string linha)
 			alfab += linha[i];
 	return alfab;
 }
-//conta a quantidade de estados Q_n na linha passada
+//conta a quantidade de estados da linha passada, no formato qN  
 static int quantiaEstados(std::string linha)
 {
 	int contador = 0;
@@ -61,7 +69,7 @@ static int to_int(char c)
 {
 	return c - '0';
 }
-//percorre a linha do arquivo, e insere no vetor os estados encontrados
+//percorre a linha do arquivo, e insere no vetor de estados finais
 static void final(std::string linha, std::vector<int>& finais)
 {
 	for (int i = 0, j = 0; i < linha.length(); i++)
@@ -71,7 +79,7 @@ static void final(std::string linha, std::vector<int>& finais)
 			j++;
 		}
 }
-//"corta" a string antes do indice passado
+// "corta" a string antes do indice passado
 static std::string corta(std::string str, int inicio)
 {
 	std::string result = "";
@@ -92,6 +100,15 @@ static int indicePrimeiraOcorrencia(const std::string& str, char c)
 	}
 	return -1;
 }
+/**
+ * A funcao percorre todo o arquivo .txt, com os dados no seguinte formato
+ * alfabeto={q<estado>,...}
+ * estados={q<estado>,...}
+ * finais={q<estado>,...}
+ * (q<estado>, <caractere>) = q<estado_destino>
+ * comportamento indefinido caso esteja fora desse formato,
+ * depois de ler, a funcao aloca os dados em um objeto Automato
+ */
 Automato* carregaArq(std::string nome)
 {
 	std::ifstream arquivo(nome.c_str());
@@ -151,6 +168,7 @@ Automato* carregaArq(std::string nome)
 	arquivo.close();
 	return automato;
 }
+/// le tudo que esta no buffer em uma string e valida apenas o primeiro digito
 int leBuffer(int floor, int ceil)
 {
 	std::string buffer;
@@ -175,5 +193,6 @@ int leBuffer(int floor, int ceil)
 		{
 			std::cout << "Digite um valor valido\n";
 		}
+		std::cin.clear();
 	}
 }
