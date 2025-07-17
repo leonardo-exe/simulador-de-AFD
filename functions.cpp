@@ -49,7 +49,7 @@ bool existeNoAlfabeto(const Estado& q, std::string alfabeto)
 {
 	std::string alfab = "";
 	for (int i = 0; i < linha.length(); i++)
-		if (linha[i] == '{' || linha[i] == '}' || linha[i] == ',' || linha[i] == '=')
+		if (linha[i] == '{' || linha[i] == '}' || linha[i] == ',' || linha[i] == '=' || linha[i] == ' ')
 			continue;
 		else
 			alfab += linha[i];
@@ -143,6 +143,11 @@ Automato* carregaArq(std::string nome)
 				elemento = to_int(linha[i + 1]);
 			}
 			if (linha[i] == ',') {
+				if (linha[i + 1] == ' ')
+				{
+					caractere = linha[i + 2];
+					break;
+				}
 				caractere = linha[i + 1];
 				break;
 			}
